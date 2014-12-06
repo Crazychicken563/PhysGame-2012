@@ -69,4 +69,9 @@ final class Wall {
     public String toString() {
         return start.getX() + "," + start.getY() + "," + end.getX() + "," + end.getY();
     }
+    
+    public String getCode()
+    {
+        return "";
+    }
 }
