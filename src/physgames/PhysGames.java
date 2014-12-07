@@ -39,6 +39,8 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
     private int currGrav;
     private int enterG = -1;
     private boolean setUpWind = false;
+    private boolean moveLaunch = false;
+    private boolean moveTarget = false;
 
     @Override
     public void init() {
@@ -216,6 +218,21 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
         level.addUserWall(new Wall(10, 70, 190, 70, 2));
         level.addUserWall(new Wall(10, 80, 190, 80, 2));
         levels.add(level);
+        //level 12
+        level = new Level(new Point(72.0, 456.0), new Point(456.0, 17.0));
+        level.setMessage("Level_Description");
+        level.setWind(0.0);
+        level.addWall(new Wall(255, 36, 290, 36, 1));
+        level.addWall(new Wall(255, 60, 255, 36, 1));
+        level.addWall(new Wall(255, 60, 293, 69, 1));
+        level.addWall(new Wall(267, 55, 290, 36, 1));
+        level.addWall(new Wall(267, 50, 294, 66, 1));
+        level.addWall(new Wall(236, 96, 341, 71, 1));
+        level.addWall(new Wall(290, 36, 341, 71, 1));
+        level.addWall(new Wall(200, 94, 365, 137, 1));
+        level.addWall(new Wall(200, 94, 255, 36, 1));
+        level.addGravTube(new GravTube(362, 156, 461, 42, 5.0));
+        levels.add(level);
         //currLevel = 12;
         physics = new PhysicsEngine(levels.get(currLevel).getStart().getIntX(), levels.get(currLevel).getStart().getIntY());
         walls = levels.get(currLevel).getUserWalls();
@@ -234,6 +251,8 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
                 + "Press \"R\" when you want to restart a level\n"
                 + "Press \"W\" to move around walls. Press it again when finished\n"
                 + "Press \"L\" to lock the launch angle and velocity if you want to move the walls and launch in the same place\n"
+                + "Press \"B\" to access the level builder\n"
+                + "Press \"C\" in the level builder to get the level code\n"
                 + "Other important info:\n"
                 + "Black walls are normal.\n"
                 + "Green walls make you bounce higher.\n"
@@ -281,7 +300,11 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
         if (usingPowerBall) {
             offScreen.setColor(Color.orange);
         }
+        //if (moveLaunch) {
+        //physics.setStartPoint(levels.get(currLevel).getStart());
+        //}//else{
         offScreen.drawOval(modXToDrawCoord(physics.lastLocation().getIntX() - 2), modYToDrawCoord(physics.lastLocation().getIntY() + 2), 5, 5);
+        //}
         offScreen.setColor(Color.black);
         if (setUpWalls) {
             for (int i = 0; i < walls.size(); i++) {
@@ -445,10 +468,10 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
                                 JOptionPane.showMessageDialog(this, ":(", "That makes me sad.", 1);
                             }
                             //JOptionPane.showMessageDialog(this, "A WINNER IS YOU", "YOU ARE A WINNER", 2);
-                            System.exit(1);
+                            System.exit(0);
                             return;
                         }
-                    } catch (Exception e) {
+                    } catch (HeadlessException e) {
                     }
                 }
             } else {
@@ -578,7 +601,7 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
         try {
             DecimalFormat twoDForm = new DecimalFormat("#.##");
             return Double.valueOf(twoDForm.format(d));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             System.err.println("There is no reason for this to break here. but I'll catch whatever happens anyway");
             return d;
         }
@@ -612,68 +635,89 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
                 if (e.getX() >= 10 && e.getX() <= 40 && e.getY() >= 10 && e.getY() <= 20) {
                     setUpWind = !setUpWind;
                 }
-            }
-            if (currLevel == 0) {
+                boolean clickedOut = true;
                 for (int i = 0; i < gravs.size(); i++) {
                     if (e.getX() > 200) {
                         if (checkZeroG(gravs.get(i), new Point(modXToMathCoord(e.getX()), modYToMathCoord(e.getY())))) {
                             enterG = i;
+                            clickedOut = false;
                             i = gravs.size();
                         }
                     }
                 }
+                if (clickedOut) {
+                    enterG = -1;
+                }
             }
             if (clicked) {
-                if (moveWallX > -1) {
-                    Wall temp = walls.remove(moveWallX);
-                    temp.setStart(new Point(e.getX(), e.getY()));
-                    walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                }
-                if (moveWallY > -1) {
-                    Wall temp = walls.remove(moveWallY);
-                    temp.setEnd(new Point(e.getX(), e.getY()));
-                    walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                }
-                if (moveWallX < -1 && currLevel == 0) {
-                    GravTube temp = gravs.get((moveWallX + 2) * -1);
-                    temp.setTL(e.getX(), e.getY());
-                    //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                }
-                if (moveWallY < -1 && currLevel == 0) {
-                    GravTube temp = gravs.get((moveWallY + 2) * -1);
-                    temp.setBR(e.getX(), e.getY());
-                    //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                if (moveLaunch) {
+                    //clicked = false;
+                    moveLaunch = false;
+                } else if (moveTarget) {
+                    //clicked = false;
+                    moveTarget = false;
+                } else {
+                    if (moveWallX > -1) {
+                        Wall temp = walls.remove(moveWallX);
+                        temp.setStart(new Point(e.getX(), e.getY()));
+                        walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                    }
+                    if (moveWallY > -1) {
+                        Wall temp = walls.remove(moveWallY);
+                        temp.setEnd(new Point(e.getX(), e.getY()));
+                        walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                    }
+                    if (moveWallX < -1 && currLevel == 0) {
+                        GravTube temp = gravs.get((moveWallX + 2) * -1);
+                        temp.setTL(e.getX(), e.getY());
+                        //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                    }
+                    if (moveWallY < -1 && currLevel == 0) {
+                        GravTube temp = gravs.get((moveWallY + 2) * -1);
+                        temp.setBR(e.getX(), e.getY());
+                        //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                    }
+                    moveWallX = -1;
+                    moveWallY = -1;
                 }
                 clicked = false;
-                moveWallX = -1;
-                moveWallY = -1;
             } else if (!clicked) {
-                moveWallX = -1;
-                moveWallY = -1;
-                for (int i = 0; i < walls.size(); i++) {
-                    //System.out.println(e.getX() + "," + e.getY());
-                    if (physics.distance(walls.get(i).x1(), walls.get(i).y1(), e.getX(), e.getY()) < 4) {
-                        moveWallX = i;
-                        //System.out.println("ClickXWallPoint");
-                        clicked = true;
+                //System.out.println(modXToMathCoord(e.getX()) + "," + modYToMathCoord(e.getY()));
+                //System.out.println(physics.lastLocation());
+                if (distance(physics.lastLocation().getX(), physics.lastLocation().getY(), modXToMathCoord(e.getX()), modYToMathCoord(e.getY())) < 4) {
+                    moveLaunch = true;
+                    clicked = true;
+                } else if (distance(levels.get(currLevel).getTarget().getX(), levels.get(currLevel).getTarget().getY(), e.getX(), e.getY()) < 10) {
+                    moveTarget = true;
+                    clicked = true;
+                } else {
+                    moveWallX = -1;
+                    moveWallY = -1;
+                    for (int i = 0; i < walls.size(); i++) {
+                        //System.out.println(e.getX() + "," + e.getY());
+                        if (physics.distance(walls.get(i).x1(), walls.get(i).y1(), e.getX(), e.getY()) < 4) {
+                            moveWallX = i;
+                            //System.out.println("ClickXWallPoint");
+                            clicked = true;
+                        }
+                        if (physics.distance(walls.get(i).x2(), walls.get(i).y2(), e.getX(), e.getY()) < 4) {
+                            moveWallY = i;
+                            //System.out.println("ClickYWallPoint");
+                            clicked = true;
+                        }
                     }
-                    if (physics.distance(walls.get(i).x2(), walls.get(i).y2(), e.getX(), e.getY()) < 4) {
-                        moveWallY = i;
-                        //System.out.println("ClickYWallPoint");
-                        clicked = true;
-                    }
-                }
-                for (int i = 0; i < gravs.size(); i++) {
-                    //System.out.println(e.getX() + "," + e.getY());
-                    if (physics.distance(gravs.get(i).getTL().getIntX(), gravs.get(i).getTL().getIntY(), e.getX(), e.getY()) < 4) {
-                        moveWallX = (-1 * i) - 2;
-                        //System.out.println("ClickXWallPoint");
-                        clicked = true;
-                    }
-                    if (physics.distance(gravs.get(i).getBR().getIntX(), gravs.get(i).getBR().getIntY(), e.getX(), e.getY()) < 4) {
-                        moveWallY = (-1 * i) - 2;
-                        //System.out.println("ClickYWallPoint");
-                        clicked = true;
+                    for (int i = 0; i < gravs.size(); i++) {
+                        //System.out.println(e.getX() + "," + e.getY());
+                        if (physics.distance(gravs.get(i).getTL().getIntX(), gravs.get(i).getTL().getIntY(), e.getX(), e.getY()) < 4) {
+                            moveWallX = (-1 * i) - 2;
+                            //System.out.println("ClickXWallPoint");
+                            clicked = true;
+                        }
+                        if (physics.distance(gravs.get(i).getBR().getIntX(), gravs.get(i).getBR().getIntY(), e.getX(), e.getY()) < 4) {
+                            moveWallY = (-1 * i) - 2;
+                            //System.out.println("ClickYWallPoint");
+                            clicked = true;
+                        }
                     }
                 }
             }
@@ -703,7 +747,7 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
                 }
                 physics = new PhysicsEngine(levels.get(currLevel).getStart().getX(), levels.get(currLevel).getStart().getY(), tempVelocity,
                         physics.findLaunchAngle(xVarGraph, yVarGraph, physics.distance(levels.get(currLevel).getStart().getX(),
-                        levels.get(currLevel).getStart().getY(), xVarGraph, yVarGraph)), levels.get(currLevel).getWind());
+                                        levels.get(currLevel).getStart().getY(), xVarGraph, yVarGraph)), levels.get(currLevel).getWind());
                 if (gravs.size() > 0 && checkZeroG(gravs.get(0), physics.lastLocation())) {
                     inZeroG = true;
                     physics.setGravity(gravs.get(0).getGravity());
@@ -724,25 +768,34 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
             yVarGraph = e.getY();
         }
         if (setUpWalls) {
-            if (moveWallX < -1 && currLevel == 0) {
-                GravTube temp = gravs.get((moveWallX + 2) * -1);
-                temp.setTL(e.getX(), e.getY());
-                //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-            }
-            if (moveWallY < -1 && currLevel == 0) {
-                GravTube temp = gravs.get((moveWallY + 2) * -1);
-                temp.setBR(e.getX(), e.getY());
-                //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-            }
-            if (moveWallX > -1) {
-                Wall temp = walls.remove(moveWallX);
-                temp.setStart(new Point(e.getX(), e.getY()));
-                walls.add(moveWallX, temp);
-            }
-            if (moveWallY > -1) {
-                Wall temp = walls.remove(moveWallY);
-                temp.setEnd(new Point(e.getX(), e.getY()));
-                walls.add(moveWallY, temp);
+            if (moveLaunch) {
+                levels.get(currLevel).setLaunch(modXToMathCoord(e.getX()), modYToMathCoord(e.getY()));
+                physics.setStartPoint(levels.get(currLevel).getStart());
+                //physics = new PhysicsEngine(e.getX(), e.getY());
+                //System.out.println(e.getX());
+            } else if (moveTarget) {
+                levels.get(currLevel).setTarget(e.getX(), e.getY());
+            } else {
+                if (moveWallX < -1 && currLevel == 0) {
+                    GravTube temp = gravs.get((moveWallX + 2) * -1);
+                    temp.setTL(e.getX(), e.getY());
+                    //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                }
+                if (moveWallY < -1 && currLevel == 0) {
+                    GravTube temp = gravs.get((moveWallY + 2) * -1);
+                    temp.setBR(e.getX(), e.getY());
+                    //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                }
+                if (moveWallX > -1) {
+                    Wall temp = walls.remove(moveWallX);
+                    temp.setStart(new Point(e.getX(), e.getY()));
+                    walls.add(moveWallX, temp);
+                }
+                if (moveWallY > -1) {
+                    Wall temp = walls.remove(moveWallY);
+                    temp.setEnd(new Point(e.getX(), e.getY()));
+                    walls.add(moveWallY, temp);
+                }
             }
         }
     }
@@ -798,10 +851,10 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
             restart = true;
         }
         if (e.getKeyChar() == 'w') {
-            if (currLevel != 0) {
-                setUpWalls = !setUpWalls;
-                restart = true;
-            }
+            //if (currLevel != 0) {
+            setUpWalls = !setUpWalls;
+            restart = true;
+            //}
         }
         if (e.getKeyChar() == 'p' && powerBallUnlocked) {
             usingPowerBall = !usingPowerBall;
@@ -809,16 +862,16 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
         if (e.getKeyChar() == 'l') {
             lockLaunch = !lockLaunch;
         }
-        if (e.getKeyChar() == 'c' && currLevel == 0) {
-            levels.get(currLevel).getUserWallsCode();
+        if (e.getKeyChar() == 'c') {
+            levels.get(currLevel).getCode(currLevel != 0);
         }
         if (e.getKeyChar() == 'b') {
             if (currLevel != 0) {
                 currLevel = 0;
-                setUpWalls = true;
+                //setUpWalls = true;
             } else {
                 currLevel = 1;
-                setUpWalls = false;
+                //setUpWalls = false;
             }
             restart = true;
             walls = levels.get(currLevel).getUserWalls();

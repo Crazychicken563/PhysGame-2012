@@ -357,5 +357,6 @@ public final class PhysicsEngine {
 
     public void setStartPoint(Point in) {
         startPoint = new Point(in.getX(), in.getY());
+        flightPath.add(startPoint);
     }
 }

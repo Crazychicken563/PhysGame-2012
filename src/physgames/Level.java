@@ -34,19 +34,32 @@ public class Level {
         return userWalls;
     }
 
-    public void getUserWallsCode() {
-        System.out.println("level.setWind("+getWind()+");");
+    public void getCode(boolean all) {
+        System.out.println("level = new Level(new Point" + launch.toString() + ", new Point" + target.toString() + ");");
+        System.out.println("level.setMessage(\"Level_Description\");");
+        System.out.println("level.setWind(" + getWind() + ");");
+        if (all) {
+            for (Wall w : walls) {
+                System.out.println(w.getCode());
+            }
+        }
         for (Wall wall : userWalls) {
             if (wall.getEnd().getX() > 200) {
                 System.out.println(wall.getCode());
             }
         }
-        for(GravTube grav : gravs)
-        {
-            if(grav.getTL().getIntX()>200){
+        for (GravTube grav : gravs) {
+            if (grav.getTL().getIntX() > 200) {
                 System.out.println(grav.getCode());
             }
         }
+        //int dx = 0;
+        //for(int i = 0;i<10;i++)
+        //{
+        //    level.addUserWall(new Wall(10, 60+dx, 190, 60+dx, 1));
+        //    dx+=10;
+        //}
+        System.out.println("levels.add(level);");
         System.out.println("----------------------------------------------------");
     }
 
@@ -84,5 +97,15 @@ public class Level {
 
     public ArrayList<GravTube> getGravs() {
         return gravs;
+    }
+
+    public void setLaunch(int x, int y) {
+        launch.setX(x);
+        launch.setY(y);
+    }
+
+    public void setTarget(int x, int y) {
+        target.setX(x);
+        target.setY(y);
     }
 }

@@ -13,12 +13,22 @@ final class Wall {
         start = new Point(s);
         end = new Point(e);
         type = t;
+        resetCoords();
     }
 
     public Wall(int x1, int y1, int x2, int y2, int t) {
         start = new Point(x1, y1);
         end = new Point(x2, y2);
         type = t;
+        resetCoords();
+    }
+    
+    public void resetCoords() {
+        if (end.getX() < start.getX()) {
+            Point temp = new Point(end);
+            end = new Point(start);
+            start = new Point(temp);
+        }
     }
 
     public Point getStart() {
@@ -44,14 +54,12 @@ final class Wall {
     public int y2() {
         return end.getIntY();
     }
-    
-    public void setType(int t)
-    {
+
+    public void setType(int t) {
         type = t;
     }
-    
-    public int getType()
-    {
+
+    public int getType() {
         return type;
     }
 
@@ -69,9 +77,8 @@ final class Wall {
     public String toString() {
         return start.getX() + "," + start.getY() + "," + end.getX() + "," + end.getY();
     }
-    
-    public String getCode()
-    {
-        return "";
+
+    public String getCode() {
+        return "level.addWall(new Wall(" + start.getIntX() + "," + start.getIntY() + "," + end.getIntX() + "," + end.getIntY() + "," + type + "));";
     }
 }
