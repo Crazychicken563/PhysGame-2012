@@ -220,20 +220,29 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
         levels.add(level);
         //level 12
         level = new Level(new Point(72.0, 456.0), new Point(456.0, 17.0));
-        level.setMessage("Level_Description");
+        level.setMessage("Meep");
+        level.addGravTube(new GravTube(200, 500, 200, 500, -9.8));
         level.setWind(0.0);
         level.addWall(new Wall(255, 36, 290, 36, 1));
         level.addWall(new Wall(255, 60, 255, 36, 1));
-        level.addWall(new Wall(255, 60, 293, 69, 1));
-        level.addWall(new Wall(267, 55, 290, 36, 1));
-        level.addWall(new Wall(267, 50, 294, 66, 1));
-        level.addWall(new Wall(236, 96, 341, 71, 1));
+        level.addWall(new Wall(255, 60, 290, 69, 1));
+        level.addWall(new Wall(267, 50, 290, 36, 1));
+        level.addWall(new Wall(267, 50, 290, 66, 1));
+        level.addWall(new Wall(236, 94, 341, 71, 1));
         level.addWall(new Wall(290, 36, 341, 71, 1));
         level.addWall(new Wall(200, 94, 365, 137, 1));
         level.addWall(new Wall(200, 94, 255, 36, 1));
         level.addGravTube(new GravTube(362, 156, 461, 42, 5.0));
         levels.add(level);
-        //currLevel = 12;
+        level = new Level(new Point(239.0,158.0), new Point(318.0,320.0));
+level.setMessage("Level_Description");
+level.addGravTube(new GravTube(200, 500, 200, 500, -9.8));
+level.setWind(0.0);
+level.addWall(new Wall(220,367,536,365,1));
+level.addWall(new Wall(292,233,536,365,1));
+level.addWall(new Wall(220,367,292,233,1));
+levels.add(level);
+        currLevel = 14;
         physics = new PhysicsEngine(levels.get(currLevel).getStart().getIntX(), levels.get(currLevel).getStart().getIntY());
         walls = levels.get(currLevel).getUserWalls();
         gravs = levels.get(currLevel).getGravs();
@@ -650,74 +659,75 @@ public class PhysGames extends Applet implements MouseMotionListener, MouseListe
                 }
             }
             if (clicked) {
+                //if (currLevel == 0) {
                 if (moveLaunch) {
                     //clicked = false;
                     moveLaunch = false;
                 } else if (moveTarget) {
                     //clicked = false;
                     moveTarget = false;
-                } else {
-                    if (moveWallX > -1) {
-                        Wall temp = walls.remove(moveWallX);
-                        temp.setStart(new Point(e.getX(), e.getY()));
-                        walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                    }
-                    if (moveWallY > -1) {
-                        Wall temp = walls.remove(moveWallY);
-                        temp.setEnd(new Point(e.getX(), e.getY()));
-                        walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                    }
-                    if (moveWallX < -1 && currLevel == 0) {
-                        GravTube temp = gravs.get((moveWallX + 2) * -1);
-                        temp.setTL(e.getX(), e.getY());
-                        //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                    }
-                    if (moveWallY < -1 && currLevel == 0) {
-                        GravTube temp = gravs.get((moveWallY + 2) * -1);
-                        temp.setBR(e.getX(), e.getY());
-                        //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
-                    }
-                    moveWallX = -1;
-                    moveWallY = -1;
+                } else if (moveWallX > -1) {
+                    Wall temp = walls.remove(moveWallX);
+                    temp.setStart(new Point(e.getX(), e.getY()));
+                    walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
                 }
+                if (moveWallY > -1) {
+                    Wall temp = walls.remove(moveWallY);
+                    temp.setEnd(new Point(e.getX(), e.getY()));
+                    walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                }
+                if (moveWallX < -1 && currLevel == 0) {
+                    GravTube temp = gravs.get((moveWallX + 2) * -1);
+                    temp.setTL(e.getX(), e.getY());
+                    //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                }
+                if (moveWallY < -1 && currLevel == 0) {
+                    GravTube temp = gravs.get((moveWallY + 2) * -1);
+                    temp.setBR(e.getX(), e.getY());
+                    //walls.add(new Wall(temp.getStart(), temp.getEnd(), temp.getType()));
+                }
+                moveWallX = -1;
+                moveWallY = -1;
+
                 clicked = false;
             } else if (!clicked) {
                 //System.out.println(modXToMathCoord(e.getX()) + "," + modYToMathCoord(e.getY()));
                 //System.out.println(physics.lastLocation());
-                if (distance(physics.lastLocation().getX(), physics.lastLocation().getY(), modXToMathCoord(e.getX()), modYToMathCoord(e.getY())) < 4) {
-                    moveLaunch = true;
-                    clicked = true;
-                } else if (distance(levels.get(currLevel).getTarget().getX(), levels.get(currLevel).getTarget().getY(), e.getX(), e.getY()) < 10) {
-                    moveTarget = true;
-                    clicked = true;
-                } else {
-                    moveWallX = -1;
-                    moveWallY = -1;
-                    for (int i = 0; i < walls.size(); i++) {
-                        //System.out.println(e.getX() + "," + e.getY());
-                        if (physics.distance(walls.get(i).x1(), walls.get(i).y1(), e.getX(), e.getY()) < 4) {
-                            moveWallX = i;
-                            //System.out.println("ClickXWallPoint");
-                            clicked = true;
-                        }
-                        if (physics.distance(walls.get(i).x2(), walls.get(i).y2(), e.getX(), e.getY()) < 4) {
-                            moveWallY = i;
-                            //System.out.println("ClickYWallPoint");
-                            clicked = true;
-                        }
+                if (currLevel == 0) {
+                    if (distance(physics.lastLocation().getX(), physics.lastLocation().getY(), modXToMathCoord(e.getX()), modYToMathCoord(e.getY())) < 4) {
+                        moveLaunch = true;
+                        clicked = true;
+                    } else if (distance(levels.get(currLevel).getTarget().getX(), levels.get(currLevel).getTarget().getY(), e.getX(), e.getY()) < 10) {
+                        moveTarget = true;
+                        clicked = true;
                     }
-                    for (int i = 0; i < gravs.size(); i++) {
-                        //System.out.println(e.getX() + "," + e.getY());
-                        if (physics.distance(gravs.get(i).getTL().getIntX(), gravs.get(i).getTL().getIntY(), e.getX(), e.getY()) < 4) {
-                            moveWallX = (-1 * i) - 2;
-                            //System.out.println("ClickXWallPoint");
-                            clicked = true;
-                        }
-                        if (physics.distance(gravs.get(i).getBR().getIntX(), gravs.get(i).getBR().getIntY(), e.getX(), e.getY()) < 4) {
-                            moveWallY = (-1 * i) - 2;
-                            //System.out.println("ClickYWallPoint");
-                            clicked = true;
-                        }
+                }
+                moveWallX = -1;
+                moveWallY = -1;
+                for (int i = 0; i < walls.size(); i++) {
+                    //System.out.println(e.getX() + "," + e.getY());
+                    if (physics.distance(walls.get(i).x1(), walls.get(i).y1(), e.getX(), e.getY()) < 4) {
+                        moveWallX = i;
+                        //System.out.println("ClickXWallPoint");
+                        clicked = true;
+                    }
+                    if (physics.distance(walls.get(i).x2(), walls.get(i).y2(), e.getX(), e.getY()) < 4) {
+                        moveWallY = i;
+                        //System.out.println("ClickYWallPoint");
+                        clicked = true;
+                    }
+                }
+                for (int i = 0; i < gravs.size(); i++) {
+                    //System.out.println(e.getX() + "," + e.getY());
+                    if (physics.distance(gravs.get(i).getTL().getIntX(), gravs.get(i).getTL().getIntY(), e.getX(), e.getY()) < 4) {
+                        moveWallX = (-1 * i) - 2;
+                        //System.out.println("ClickXWallPoint");
+                        clicked = true;
+                    }
+                    if (physics.distance(gravs.get(i).getBR().getIntX(), gravs.get(i).getBR().getIntY(), e.getX(), e.getY()) < 4) {
+                        moveWallY = (-1 * i) - 2;
+                        //System.out.println("ClickYWallPoint");
+                        clicked = true;
                     }
                 }
             }

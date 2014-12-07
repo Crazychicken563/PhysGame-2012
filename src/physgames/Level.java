@@ -37,6 +37,7 @@ public class Level {
     public void getCode(boolean all) {
         System.out.println("level = new Level(new Point" + launch.toString() + ", new Point" + target.toString() + ");");
         System.out.println("level.setMessage(\"Level_Description\");");
+        System.out.println("level.addGravTube(new GravTube(200, 500, 200, 500, -9.8));");
         System.out.println("level.setWind(" + getWind() + ");");
         if (all) {
             for (Wall w : walls) {
